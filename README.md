@@ -1,5 +1,6 @@
 # Swift_ASP
-# Group Member: 
+
+## Group Member: 
 * Ian Chou
 * Pradnya Vinayak Tendolkar
 * Samank Gupta
