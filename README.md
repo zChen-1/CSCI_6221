@@ -1,4 +1,7 @@
 # Swift_ASP
+ **Name:** TBD  
+ **Language:** Swift  
+ **OS:** IOS  
 
 ## Group Member: 
 * Ian Chou
