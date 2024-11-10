@@ -37,6 +37,22 @@
 			);
 			target = 740025D22CC0C5560045829D /* Swift_ASP */;
 		};
+		74346CA42CDFF5FB0045FB33 /* Exceptions for "Swift_ASP" folder in "Swift_ASPTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Media.xcassets,
+				UserUIView.swift,
+			);
+			target = 740025E92CC0C5570045829D /* Swift_ASPTests */;
+		};
+		74346CA52CDFF5FB0045FB33 /* Exceptions for "Swift_ASP" folder in "Swift_ASPUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Media.xcassets,
+				UserUIView.swift,
+			);
+			target = 740025F32CC0C5570045829D /* Swift_ASPUITests */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -44,6 +60,8 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				740025FC2CC0C5570045829D /* Exceptions for "Swift_ASP" folder in "Swift_ASP" target */,
+				74346CA42CDFF5FB0045FB33 /* Exceptions for "Swift_ASP" folder in "Swift_ASPTests" target */,
+				74346CA52CDFF5FB0045FB33 /* Exceptions for "Swift_ASP" folder in "Swift_ASPUITests" target */,
 			);
 			path = Swift_ASP;
 			sourceTree = "<group>";

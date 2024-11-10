@@ -7,80 +7,121 @@
 
 import SwiftUI
 import CoreData
+import WebKit
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    @State private var username: String = ""
+    @State private var password: String = ""
+    @State private var message: String = ""
+    @State private var showAlert = false
+    @State private var showRegisterAlert = false
+    @State private var navigateToUserView: Bool = false
+    
+    @FocusState private var focusedField: Field?
 
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
-
+        enum Field {
+            case username, password
+        }
+    
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+        NavigationStack {
+            VStack {
+                Text("Lost and Found Map")
+                    .bold()
+                    .font(.largeTitle)
+                    .frame(maxWidth: .infinity, maxHeight: 60)
+                    .background(
+                        Image("GW color")
+                            .resizable()
+                            .scaledToFill()
+                            .clipped()
+                    )
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding()
+                Image("gwu logo")
+                    .resizable()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .aspectRatio(contentMode: .fit)
+                
+                // Login box (Username)
+                HStack {
+                    TextField("GWID", text: $username)
+                        .padding()
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(maxWidth: .infinity)
+                        .focused($focusedField, equals: .username)
+                    Text("@gwu.edu")
+                        .padding()
+                        .foregroundColor(.black)
+                }
+                
+                // Login box (Password)
+                VStack {
+                    SecureField("Password", text: $password)
+                        .padding()
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(maxWidth: .infinity).focused($focusedField, equals: .password)
+                }
+                
+                // Register Button
+                Button("Register") {
+                    message = "You must have your GWID to Login. Do you want to find your GWID?"
+                    showRegisterAlert = true
+                }
+                .alert(isPresented: $showRegisterAlert) {
+                    Alert(
+                        title: Text("Oops"),
+                        message: Text(message),
+                        primaryButton: .destructive(Text("Yes")) {
+                            // Open the browser with the GWU website
+                            if let url = URL(string: "https://it.gwu.edu/gweb") {
+                                UIApplication.shared.open(url)
+                            }
+                        },
+                        secondaryButton: .cancel(Text("No"))
+                    )
+                }
+                
+                // Login Button
+                Button("Login") {
+                    if username.isEmpty || password.isEmpty {
+                        message = "Please enter both GWID and password."
+                        showAlert = true
+                    } else if username.isEmpty {
+                        message = "Please enter your GWID."
+                        showAlert = true
+                    } else if password.isEmpty {
+                        message = "Please enter password."
+                        showAlert = true
+                    }
+                    // For test version
+                    else if username == "g123456789" || password == "123456789" {
+                        navigateToUserView = true
                     }
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                .padding()
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Oops"),
+                        message: Text(message),
+                        dismissButton: .default(Text("OK"))
+                    )
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+                .padding()
+                NavigationLink(destination: UserUIView(), isActive: $navigateToUserView) {
+                    EmptyView()
                 }
             }
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
+            .padding()
+            .navigationTitle("Login")
         }
     }
 }
 
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
 
-#Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }
