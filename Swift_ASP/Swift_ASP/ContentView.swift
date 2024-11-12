@@ -10,19 +10,34 @@ import CoreData
 import WebKit
 
 struct ContentView: View {
+    @State private var isLoggedIn: Bool = false // Manage login state
+
+    var body: some View {
+        NavigationStack {
+            if isLoggedIn {
+                UserUIView(isLoggedIn: $isLoggedIn)
+            } else {
+                LoginView(isLoggedIn: $isLoggedIn)
+            }
+        }
+    }
+}
+
+struct LoginView: View {
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var message: String = ""
     @State private var showAlert = false
     @State private var showRegisterAlert = false
     @State private var navigateToUserView: Bool = false
+    @Binding var isLoggedIn: Bool
     
     @FocusState private var focusedField: Field?
-
-        enum Field {
-            case username, password
-        }
     
+    enum Field {
+        case username, password
+    }
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -97,7 +112,9 @@ struct ContentView: View {
                     }
                     // For test version
                     else if username == "g123456789" || password == "123456789" {
-                        navigateToUserView = true
+                        //navigateToUserView = true
+                        isLoggedIn = true
+                        UserUIView(isLoggedIn: $isLoggedIn)
                     }
                 }
                 .padding()
@@ -109,9 +126,6 @@ struct ContentView: View {
                     )
                 }
                 .padding()
-                NavigationLink(destination: UserUIView(), isActive: $navigateToUserView) {
-                    EmptyView()
-                }
             }
             .padding()
             .navigationTitle("Login")

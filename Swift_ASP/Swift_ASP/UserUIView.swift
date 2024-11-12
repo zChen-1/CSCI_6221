@@ -7,11 +7,14 @@
 
 import SwiftUI
 
+
 struct UserUIView: View {
     @State private var navigateToContentView = false
+    @Binding var isLoggedIn: Bool
     
     var body: some View {
         NavigationStack {
+
             VStack {
                 Text("Map")
                     .font(.largeTitle)
@@ -35,9 +38,10 @@ struct UserUIView: View {
                     
                     Button(action: {
                         print("Logout tapped")
+                        isLoggedIn = false
                     }) {
                         HStack {
-                            Image(systemName: "figure.walk.departure")
+                            Image(systemName: "figure.walk.arrival")
                                 .resizable()
                                 .frame(width: 24, height: 24)
                             Text("Logout")
@@ -52,6 +56,6 @@ struct UserUIView: View {
 
 struct UserUIView_Previews: PreviewProvider {
     static var previews: some View {
-        UserUIView()
+        UserUIView(isLoggedIn: .constant(true))
     }
 }
