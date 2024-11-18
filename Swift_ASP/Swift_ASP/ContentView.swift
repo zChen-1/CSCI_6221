@@ -39,46 +39,54 @@ struct LoginView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                Text("Lost and Found Map")
-                    .bold()
-                    .font(.largeTitle)
-                    .frame(maxWidth: .infinity, maxHeight: 60)
-                    .background(
-                        Image("GW color")
-                            .resizable()
-                            .scaledToFill()
-                            .clipped()
-                    )
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+        VStack {
+            Text("Lost and Found Map")
+                .bold()
+                .font(.largeTitle)
+                .frame(maxWidth: .infinity, maxHeight: 60)
+                .background(
+                    Image("GW color")
+                        .resizable()
+                        .scaledToFill()
+                        .clipped()
+                )
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .padding()
+            Image("gwu logo")
+                .resizable()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .aspectRatio(contentMode: .fit)
+            
+            // Login box (Username)
+            HStack {
+                TextField("GWID", text: $username)
                     .padding()
-                Image("gwu logo")
-                    .resizable()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .aspectRatio(contentMode: .fit)
-                
-                // Login box (Username)
-                HStack {
-                    TextField("GWID", text: $username)
-                        .padding()
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(maxWidth: .infinity)
-                        .focused($focusedField, equals: .username)
-                    Text("@gwu.edu")
-                        .padding()
-                        .foregroundColor(.black)
-                }
-                
-                // Login box (Password)
-                VStack {
-                    SecureField("Password", text: $password)
-                        .padding()
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(maxWidth: .infinity).focused($focusedField, equals: .password)
-                }
-                
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(maxWidth: .infinity)
+                    .focused($focusedField, equals: .username)
+                Text("@gwu.edu")
+                    .padding()
+                    .foregroundColor(.black)
+            }
+            .onAppear {
+                        // Automatically focus the username field when the view appears
+                        focusedField = .username
+                    }
+            
+            // Login box (Password)
+            HStack {
+                SecureField("Password", text: $password)
+                    .padding()
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(maxWidth: .infinity).focused($focusedField, equals: .password)
+            }
+            .onAppear {
+                        // Automatically focus the username field when the view appears
+                focusedField = .password
+                    }
+            
+            VStack {
                 // Register Button
                 Button("Register") {
                     message = "You must have your GWID to Login. Do you want to find your GWID?"
@@ -114,7 +122,6 @@ struct LoginView: View {
                     else if username == "g123456789" || password == "123456789" {
                         //navigateToUserView = true
                         isLoggedIn = true
-                        UserUIView(isLoggedIn: $isLoggedIn)
                     }
                 }
                 .padding()

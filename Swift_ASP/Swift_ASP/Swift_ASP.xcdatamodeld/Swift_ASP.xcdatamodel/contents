@@ -3,10 +3,4 @@
     <entity name="Item" representedClassName="Item" syncable="YES" codeGenerationType="class">
         <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
     </entity>
-    <entity name="Passwords" representedClassName="Passwords" syncable="YES" codeGenerationType="class">
-        <attribute name="password" optional="YES" attributeType="String"/>
-    </entity>
-    <entity name="Usernames" representedClassName="Usernames" syncable="YES" codeGenerationType="class">
-        <attribute name="gwid" optional="YES" attributeType="String"/>
-    </entity>
 </model>
