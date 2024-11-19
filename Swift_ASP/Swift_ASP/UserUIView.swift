@@ -5,10 +5,17 @@
 //  Created by ZH Chen on 2024/11/9.
 //
 
+//
+//  UserUIView.swift
+//  Swift_ASP
+//
+//  Created by ZH Chen on 2024/11/9.
+//
+
 import SwiftUI
 import MapKit
+import CloudKit
 
-// Data model for representing a location
 struct Location: Identifiable {
     var id = UUID()
     var name: String
@@ -16,7 +23,6 @@ struct Location: Identifiable {
     var locationID: Int
 }
 
-// Data model for representing a lost item
 struct LostItems: Identifiable {
     var id = UUID()
     var name: String
@@ -27,25 +33,23 @@ struct LostItems: Identifiable {
 }
 
 struct UserUIView: View {
-    // State variables for navigation and selection
     @State private var navigateToLostView = false
     @State private var navigateToSettingView = false
     @State private var navigateToDashboardView = false
     @State private var navigateToFoundView = false
-    @State private var showItemAlert = false
-    @State private var selectedItem: LostItems? = nil
-    @State private var selectedLocationID: Int? = nil
-    
-    
+    @State private var navigateToUserView: Bool = false
+    @State private var navigateToChatView = false
     @Binding var isLoggedIn: Bool
     
-    // Initial region for the displayed map
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 38.899902, longitude: -77.047201),
         span: MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.008)
     )
+    //let lostItemsDatabase = CKContainer.default().publicCloudDatabase // Using CloudKit to save data of lost items
+    @State private var selectedLocationID: Int? = nil
+    @State private var selectedItem: LostItems? = nil
+    @State private var showItemAlert = false
     
-    // Predefined locations to be annotated on the map
     let locations = [
         Location(name: "The George Washington University Hospital", coordinate: CLLocationCoordinate2D(latitude: 38.901253, longitude: -77.050670), locationID: 1),
         Location(name: "The School of Engineering and Applied Science (SEAS)", coordinate: CLLocationCoordinate2D(latitude: 38.899934, longitude: -77.049120), locationID: 2),
@@ -53,19 +57,76 @@ struct UserUIView: View {
     ]
     
     // Example data for lost items
+    
     let lostItemsData: [LostItems] = [
         LostItems(name: "Laptop", itemType: "Electronics", itemDescription: "A silver laptop found near SEAS", locationID: 1, imageName: "No_Image_Available"),
         LostItems(name: "Phone", itemType: "Electronics", itemDescription: "An iPhone found at CCAS", locationID: 2, imageName: "No_Image_Available"),
         LostItems(name: "Book", itemType: "Literature", itemDescription: "A textbook found at GW Hospital", locationID: 3, imageName: "No_Image_Available"),
-        LostItems(name: "Pen", itemType: "Office Supplies", itemDescription: "A black pen found at GW Hospital", locationID: 2, imageName: "No_Image_Available")
+        LostItems(name: "Pen", itemType: "Office Supplies", itemDescription: "A black pen found at GW Hospital", locationID: 2, imageName: "No_Image_Available"),
+        LostItems(name: "Pencil", itemType: "Office Supplies", itemDescription: "A black pencil found at SEAS", locationID: 3, imageName: "No_Image_Available"),
+        LostItems(name: "Notebook", itemType: "Office Supplies", itemDescription: "A black notebook found at SEAS", locationID: 3, imageName: "No_Image_Available")
     ]
+    
+    //let lostItemsData: [LostItems] = fetchLostItemsFromCloudKit()
+    
+    private func test() {
+        print("Hello")
+    }
+    
+    func saveLostItemsToCloudKit(LostItems: [LostItems]) {
+        let container = CKContainer.default()
+        let privateDatabase = container.privateCloudDatabase
+
+        for item in LostItems {
+            let record = CKRecord(recordType: "LostItem")
+            record["name"] = item.name as CKRecordValue
+            record["itemType"] = item.itemType as CKRecordValue
+            record["itemDescription"] = item.itemDescription as CKRecordValue
+            record["locationID"] = item.locationID as CKRecordValue
+            record["imageName"] = item.imageName as CKRecordValue
+
+            privateDatabase.save(record) { (record, error) in
+                if let error = error {
+                    print("Error saving record: \(error)")
+                } else {
+                    print("Lost Item saved successfully: \(String(describing: record))")
+                }
+            }
+        }
+    }
+
+    func fetchLostItemsFromCloudKit() {
+        let container = CKContainer.default()
+        let privateDatabase = container.privateCloudDatabase
+        let query = CKQuery(recordType: "LostItem", predicate: NSPredicate(value: true))
+
+        privateDatabase.perform(query, inZoneWith: nil) { (records, error) in
+            if let error = error {
+                print("Error fetching records: \(error)")
+                return
+            }
+
+            if let records = records {
+                for record in records {
+                    guard let name = record["name"] as? String,
+                          let itemType = record["itemType"] as? String,
+                          let itemDescription = record["itemDescription"] as? String,
+                          let locationID = record["locationID"] as? Int,
+                          let imageName = record["imageName"] as? String else { continue }
+
+                    let lostItem = LostItems(name: name, itemType: itemType, itemDescription: itemDescription, locationID: locationID, imageName: imageName)
+                    print("Fetched Lost Item: \(lostItem)")
+                }
+            }
+        }
+    }
     
     var body: some View {
         NavigationStack {
             VStack {
                 headerView
+                //saveLostItemsToCloudKit(LostItems)
                 
-                // Map view with annotations
                 Map(coordinateRegion: $region, annotationItems: locations) { location in
                     MapAnnotation(coordinate: location.coordinate) {
                         Button(action: {
@@ -114,21 +175,25 @@ struct UserUIView: View {
                 }
             }
             
-            // Navigation links to different views
-            NavigationLink(destination: ViewFoundItems(), isActive: $navigateToFoundView) { EmptyView() }
+            // Navigation links
+            NavigationLink(destination: ViewFoundItems(navigateToUserView: $navigateToUserView), isActive: $navigateToFoundView) { EmptyView() }
             NavigationLink(destination: ViewLostItems(), isActive: $navigateToLostView) { EmptyView() }
+            //NavigationLink(destination: ViewFoundItems(), isActive: $navigateToFoundView) { EmptyView() }
             NavigationLink(destination: SettingView(), isActive: $navigateToSettingView) { EmptyView() }
-            NavigationLink(destination: DB_View(), isActive: $navigateToDashboardView) { EmptyView() }
+            //NavigationLink(destination: DB_View(), isActive: $navigateToDashboardView) { EmptyView() }
+            // If navigateToUserView is true, you can transition or handle as needed
+            if navigateToUserView {
+                //
+            }
         }
     }
     
-    // Function to handle location selection on the map
     private func selectLocation(_ location: Location) {
         region = MKCoordinateRegion(
             center: location.coordinate,
             span: MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.008)
         )
-        selectedLocationID = location.locationID
+        selectedLocationID = location.locationID // Set selected location ID
     }
     
     // Overlay to show a list of items found at the selected location
@@ -187,27 +252,26 @@ struct UserUIView: View {
         )
     }
     
-    // Header view with navigation buttons
     private var headerView: some View {
         HStack {
-            Button(action: { navigateToDashboardView.toggle() }) {
+            Button(action: { /* Dashboard Action */ }) {
                 Label("My dashboard", systemImage: "person.crop.circle")
-            }
-            .foregroundColor(.white)
+            }.foregroundColor(.white)
             
+            Button(action: {  }) {
+                Label("Chat", systemImage: "message.fill")
+            }.foregroundColor(.white)
             Spacer()
             
-            Button(action: { navigateToSettingView.toggle() }) {
+            Button(action: { /* Settings Action */ }) {
                 Label("Setting", systemImage: "gearshape.fill")
-            }
-            .foregroundColor(.white)
+            }.foregroundColor(.white)
         }
         .padding()
         .cornerRadius(10)
         .shadow(radius: 5)
     }
     
-    // Action buttons for reporting items
     private var actionButtons: some View {
         VStack {
             Button("I found an item") {
@@ -216,7 +280,7 @@ struct UserUIView: View {
             .buttonStyle(ActionButtonStyle())
             
             Button("I lost an item") {
-                navigateToLostView = true
+                navigateToLostView = true  // Add navigation to lost items
             }
             .buttonStyle(ActionButtonStyle())
         }
@@ -224,7 +288,6 @@ struct UserUIView: View {
     }
 }
 
-// Custom button style for action buttons
 struct ActionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -238,7 +301,6 @@ struct ActionButtonStyle: ButtonStyle {
     }
 }
 
-// Preview provider for testing the UI
 struct UserUIView_Previews: PreviewProvider {
     static var previews: some View {
         UserUIView(isLoggedIn: .constant(true))

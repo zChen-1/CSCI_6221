@@ -6,11 +6,11 @@
 //
 
 import SwiftUI
-import CoreData
 import UIKit
+import CloudKit
 
 struct ViewFoundItems: View {
-    @State private var gwid: String = ""
+    @Binding var navigateToUserView: Bool  // Binding for navigation back
     @State private var email: String = ""
     @State private var confirmEmail: String = ""
     @State private var selectedLocation: String = "Select a location"
@@ -18,11 +18,10 @@ struct ViewFoundItems: View {
     @State private var description: String = ""
     @State private var message: String = ""
     @State private var showAlert = false
-    @State private var selectedImage: UIImage? // Variable to hold the selected image
-    @State private var showingImagePicker = false // State for image picker
-    @State private var isCamera = false // State to determine if camera or photo library is used
+    @State private var selectedImage: UIImage?
+    @State private var showingImagePicker = false
+    @State private var isCamera = false
     
-    // Define item types and locations
     let itemTypes: [String] = ["Select an item type", "Book", "Journal", "Magazine", "Article", "ID", "Key", "Other"]
     let locations: [String] = ["Select a location", "The George Washington University Hospital", "The School of Engineering and Applied Science (SEAS)", "The Columbian College of Arts and Sciences (CCAS)"]
     
@@ -47,42 +46,35 @@ struct ViewFoundItems: View {
                     
                     HStack {
                         if let selectedImage = selectedImage {
-                            Image(uiImage: selectedImage)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 200)
-                                .cornerRadius(10)
+                            Button(action: {
+                                showingImagePicker.toggle() // Show image picker again
+                            }) {
+                                Image(uiImage: selectedImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 200)
+                                    .cornerRadius(10)
+                            }
+                            .padding()
                         } else {
                             Button(action: {
                                 showingImagePicker.toggle() // Show image picker
                             }) {
                                 Text("Add Image")
                                     .padding()
-                                    .foregroundColor(.white)
-                                    .background(Color.blue)
+                                    .foregroundColor(.black)
+                                    .background(Color.white)
                                     .cornerRadius(10)
-                            }
-                            .sheet(isPresented: $showingImagePicker) {
-                                ImagePicker(image: $selectedImage, isCamera: $isCamera) // Use ImagePicker when adding images
                             }
                         }
                         
-                        // Submit Button
                         Button("Submit") {
-                            if email.isEmpty || !isValidEmail(email) {
-                                message = "Something went wrong. Please check your email address."
-                                showAlert = true
-                            } else if email != confirmEmail || !isValidEmail(email) {
-                                message = "The confirmed email address is inconsistent with the email address. Please check."
-                                showAlert = true
-                            } else if selectedLocation == "Select a location" {
-                                message = "Please select a location."
-                                showAlert = true
-                            } else if selectedItemType == "Select an item type" {
-                                message = "Please select an item type."
-                                showAlert = true
-                            } else {
+                            if isValidInputs() {
                                 handleSubmit()
+                                message = "Item reported successfully!"
+                                navigateToUserView = true // Navigate back after submission
+                            } else {
+                                showAlert = true
                             }
                         }
                         .alert(isPresented: $showAlert) {
@@ -96,10 +88,12 @@ struct ViewFoundItems: View {
                         .background(Color.white)
                         .cornerRadius(10)
                         .shadow(radius: 10)
-                        .disabled(email.isEmpty || confirmEmail.isEmpty || selectedLocation == "Select a location" || selectedItemType == "Select an item type")
                     }
                 }
                 .padding()
+                .sheet(isPresented: $showingImagePicker) {
+                    ImagePicker(image: $selectedImage, isCamera: $isCamera) // Use ImagePicker when adding images
+                }
                 .background(
                     Image("GW color")
                         .resizable()
@@ -112,12 +106,9 @@ struct ViewFoundItems: View {
         }
     }
     
-    // Header View
     private var headerView: some View {
         HStack {
-            Button(action: {
-            // Dashboard action
-            }) {
+            Button(action: { /* Dashboard action */ }) {
                 HStack {
                     Image(systemName: "person.crop.circle")
                     Text("My dashboard")
@@ -127,9 +118,7 @@ struct ViewFoundItems: View {
             
             Spacer()
             
-            Button(action: {
-                print("Setting button works")
-            }) {
+            Button(action: { print("Setting button works") }) {
                 HStack {
                     Image(systemName: "gearshape.fill")
                     Text("Setting")
@@ -142,7 +131,6 @@ struct ViewFoundItems: View {
         .shadow(radius: 5)
     }
     
-    // Input Field
     private func inputField(title: String, text: Binding<String>) -> some View {
         VStack(alignment: .leading) {
             Text(title)
@@ -176,7 +164,6 @@ struct ViewFoundItems: View {
         .padding(.horizontal)
     }
     
-    // Picker Field
     private func pickerField(title: String, selection: Binding<String>, options: [String]) -> some View {
         VStack(alignment: .leading) {
             Text(title)
@@ -195,16 +182,60 @@ struct ViewFoundItems: View {
         }
         .padding(.horizontal)
     }
+
+    func saveLostItemsToCloudKit(lostItems: [LostItems]) {
+        let container = CKContainer.default()
+        let privateDatabase = container.privateCloudDatabase
+
+        for item in lostItems {
+            let record = CKRecord(recordType: "LostItem")
+            record["name"] = item.name as CKRecordValue
+            record["itemType"] = item.itemType as CKRecordValue
+            record["itemDescription"] = item.itemDescription as CKRecordValue
+            record["locationID"] = item.locationID as CKRecordValue
+            record["imageName"] = item.imageName as CKRecordValue
+
+            privateDatabase.save(record) { (record, error) in
+                if let error = error {
+                    print("Error saving record: \(error)")
+                } else {
+                    print("Lost Item saved successfully: \(String(describing: record))")
+                }
+            }
+        }
+    }
     
-    // Email format validation
+    private func isValidInputs() -> Bool {
+        if email.isEmpty || !isValidEmail(email) {
+            message = "Please enter a valid email address."
+            return false
+        }
+        if email != confirmEmail {
+            message = "Email and confirmation must match."
+            return false
+        }
+        if selectedLocation == "Select a location" {
+            message = "Please select a location."
+            return false
+        }
+        if selectedItemType == "Select an item type" {
+            message = "Please select an item type."
+            return false
+        }
+        return true
+    }
+    
+    // Email format validation,
     func isValidEmail(_ email: String) -> Bool {
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Z0-9a-z.-]+\\.[A-Za-z]{2,}"
         let emailTest = NSPredicate(format: "SELF MATCHES %@", emailRegEx)
         return emailTest.evaluate(with: email)
     }
     
-    // Handle Submit
+    // Handle Submit to save, connect to a DB later!!!
     private func handleSubmit() {
+        // Implement your submission logic here, e.g., send data to a server or save it
+        //saveLostItemsToCloudKit(lostItems)
         print("Email: \(email), Location: \(selectedLocation), Item Type: \(selectedItemType), Description: \(description)")
     }
 }
@@ -234,24 +265,25 @@ struct ImagePicker: UIViewControllerRepresentable {
             self.parent = parent
         }
         
-        // Delegate method called when an image is selected
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            // Set the selected image
             if let uiImage = info[.originalImage] as? UIImage {
-                parent.image = uiImage // Set the selected image
+                parent.image = uiImage
             }
             picker.dismiss(animated: true) // Dismiss the picker
         }
         
-        // Delegate method called when the picker is cancelled
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             picker.dismiss(animated: true) // Dismiss the picker
         }
     }
 }
 
-            // Preview Provider
 struct ViewFoundItems_Previews: PreviewProvider {
     static var previews: some View {
-        ViewFoundItems() // Preview the ViewFoundItems view
+        Group {
+            ViewFoundItems(navigateToUserView: .constant(false)) // Logged Out State
+                .previewDisplayName("Report Found Item")
+        }
     }
 }
