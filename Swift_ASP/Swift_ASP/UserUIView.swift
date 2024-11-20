@@ -5,13 +5,6 @@
 //  Created by ZH Chen on 2024/11/9.
 //
 
-//
-//  UserUIView.swift
-//  Swift_ASP
-//
-//  Created by ZH Chen on 2024/11/9.
-//
-
 import SwiftUI
 import MapKit
 import CloudKit
@@ -67,11 +60,6 @@ struct UserUIView: View {
         LostItems(name: "Notebook", itemType: "Office Supplies", itemDescription: "A black notebook found at SEAS", locationID: 3, imageName: "No_Image_Available")
     ]
     
-    //let lostItemsData: [LostItems] = fetchLostItemsFromCloudKit()
-    
-    private func test() {
-        print("Hello")
-    }
     
     func saveLostItemsToCloudKit(LostItems: [LostItems]) {
         let container = CKContainer.default()
@@ -123,10 +111,11 @@ struct UserUIView: View {
     
     var body: some View {
         NavigationStack {
+            HStack(alignment: .center) {
+                Spacer()
+            }
+            
             VStack {
-                headerView
-                //saveLostItemsToCloudKit(LostItems)
-                
                 Map(coordinateRegion: $region, annotationItems: locations) { location in
                     MapAnnotation(coordinate: location.coordinate) {
                         Button(action: {
@@ -178,13 +167,9 @@ struct UserUIView: View {
             // Navigation links
             NavigationLink(destination: ViewFoundItems(navigateToUserView: $navigateToUserView), isActive: $navigateToFoundView) { EmptyView() }
             NavigationLink(destination: ViewLostItems(), isActive: $navigateToLostView) { EmptyView() }
-            //NavigationLink(destination: ViewFoundItems(), isActive: $navigateToFoundView) { EmptyView() }
             NavigationLink(destination: SettingView(), isActive: $navigateToSettingView) { EmptyView() }
-            //NavigationLink(destination: DB_View(), isActive: $navigateToDashboardView) { EmptyView() }
-            // If navigateToUserView is true, you can transition or handle as needed
-            if navigateToUserView {
-                //
-            }
+            Spacer()
+            bottomToolbar
         }
     }
     
@@ -252,24 +237,35 @@ struct UserUIView: View {
         )
     }
     
-    private var headerView: some View {
-        HStack {
-            Button(action: { /* Dashboard Action */ }) {
-                Label("My dashboard", systemImage: "person.crop.circle")
-            }.foregroundColor(.white)
-            
-            Button(action: {  }) {
-                Label("Chat", systemImage: "message.fill")
-            }.foregroundColor(.white)
-            Spacer()
-            
-            Button(action: { /* Settings Action */ }) {
-                Label("Setting", systemImage: "gearshape.fill")
-            }.foregroundColor(.white)
-        }
-        .padding()
-        .cornerRadius(10)
-        .shadow(radius: 5)
+    // Bottom toolbar
+    private var bottomToolbar: some View {
+            HStack {
+                // Chat button
+                Button(action: { print("Chat Action") }) {
+                    Label("Chat", systemImage: "message.fill")
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding()
+
+                Button(action: { print("Homepage Action") }) {
+                    Label("", systemImage: "house.fill")
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding()
+
+                // Profile button
+                Button(action: { print("Profile Action") }) {
+                    Label("Profile", systemImage: "person.crop.circle")
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding()
+            }
+            .frame(height: 60)
+            .background(Color.white)
+            .shadow(radius: 5)
     }
     
     private var actionButtons: some View {
@@ -280,7 +276,7 @@ struct UserUIView: View {
             .buttonStyle(ActionButtonStyle())
             
             Button("I lost an item") {
-                navigateToLostView = true  // Add navigation to lost items
+                navigateToLostView = true
             }
             .buttonStyle(ActionButtonStyle())
         }

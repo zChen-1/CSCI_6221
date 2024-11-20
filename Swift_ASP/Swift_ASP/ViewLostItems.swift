@@ -15,70 +15,135 @@ struct LostItem: Identifiable {
 
 struct ViewLostItems: View {
     @State private var navigateToLostView: Bool = false
-    @State private var lostItems: [LostItem] = [
-        LostItem(name: "Laptop"),
-        LostItem(name: "Phone"),
-        LostItem(name: "Wallet"),
-        LostItem(name: "Keys"),
-        LostItem(name: "Backpack"),
-        LostItem(name: "Textbook"),
-        LostItem(name: "ID Card"),
-        LostItem(name: "Umbrella"),
-        LostItem(name: "Gloves"),
-        LostItem(name: "Headphones")
-    ]
+    @State private var email: String = ""
+    @State private var confirmEmail: String = ""
+    @State private var selectedLocation: String = "Select a location"
+    @State private var selectedItemType: String = "Select an item type"
+    @State private var description: String = ""
+    
+    let itemTypes: [String] = ["Select an item type", "Book", "Journal", "Magazine", "Article", "ID", "Key", "Other"]
+    let locations: [String] = ["Select a location", "The George Washington University Hospital", "The School of Engineering and Applied Science (SEAS)", "The Columbian College of Arts and Sciences (CCAS)"]
     
     var body: some View {
         NavigationStack {
             VStack {
-                headerView
+                Text("Report a Lost Item")
+                    .font(.title)
+                    .foregroundColor(.gray)
+                    .padding()
                 
-                List(lostItems) { item in
-                    NavigationLink(destination: LostItemDetailView(item: item)) {
-                        Text(item.name)
-                    }
+                inputField(title: "Enter your Email Address", text: $email)
+                inputField(title: "Confirm your Email Address", text: $confirmEmail)
+                pickerField(title: "Where did you find it?", selection: $selectedLocation, options: locations)
+                pickerField(title: "What is that?", selection: $selectedItemType, options: itemTypes)
+                descriptionField(title: "More details", text: $description)
+                
+                Spacer()
+                Button(action: { navigateToLostView.toggle() }) {
+                    Text("Submit")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
                 }
-                .listStyle(InsetGroupedListStyle())
-                .navigationTitle("Lost Items")
+                Spacer()
             }
+            .navigationTitle("Report Lost Item")
+            .navigationBarTitleDisplayMode(.inline)
             .background(
                 Image("GW color")
                     .resizable()
                     .scaledToFill()
                     .clipped()
             )
+            bottomToolbar
         }
     }
     
-    // Header View
-    private var headerView: some View {
-        HStack {
-            Button(action: {
-                // Action for the dashboard
-            }) {
-                HStack {
-                    Image(systemName: "person.crop.circle")
-                    Text("My dashboard")
+    // Bottom toolbar
+    private var bottomToolbar: some View {
+            HStack {
+                // Chat button
+                Button(action: { print("Chat Action") }) {
+                    Label("Chat", systemImage: "message.fill")
                 }
-            }
-            .foregroundColor(.white)
-            
-            Spacer()
-            
-            Button(action: {
-                print("Setting button works")
-            }) {
-                HStack {
-                    Image(systemName: "gearshape.fill")
-                    Text("Setting")
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding()
+
+                Button(action: { print("Homepage Action") }) {
+                    Label("", systemImage: "house.fill")
                 }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding()
+
+                // Profile button
+                Button(action: { print("Profile Action") }) {
+                    Label("Profile", systemImage: "person.crop.circle")
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding()
             }
-            .foregroundColor(.white)
-        }
-        .padding()
-        .cornerRadius(10)
-        .shadow(radius: 5)
+            .frame(height: 60)
+            .background(Color.white)
+            .shadow(radius: 5)
     }
+    
+    private func inputField(title: String, text: Binding<String>) -> some View {
+        VStack(alignment: .leading) {
+            Text(title)
+                .font(.headline)
+                .foregroundColor(.white)
+            TextField(title, text: text)
+                .padding()
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .cornerRadius(10)
+                .frame(maxWidth: .infinity)
+        }
+        .padding(.horizontal)
+    }
+    
+    private func descriptionField(title: String, text: Binding<String>) -> some View {
+        VStack(alignment: .leading) {
+            Text(title)
+                .font(.headline)
+                .foregroundColor(.white)
+            
+            TextEditor(text: text)
+                .padding()
+                .background(Color.white)
+                .cornerRadius(10)
+                .frame(height: 90)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.gray, lineWidth: 1)
+                )
+        }
+        .padding(.horizontal)
+    }
+    
+    private func pickerField(title: String, selection: Binding<String>, options: [String]) -> some View {
+        VStack(alignment: .leading) {
+            Text(title)
+                .font(.headline)
+                .foregroundColor(.white)
+            Picker(title, selection: selection) {
+                ForEach(options, id: \.self) { option in
+                    Text(option)
+                }
+            }
+            .pickerStyle(MenuPickerStyle())
+            .padding()
+            .frame(width: 370)
+            .background(Color.white)
+            .cornerRadius(10)
+        }
+        .padding(.horizontal)
+    }
+
 }
 
 // Detail view for each lost item

@@ -29,8 +29,6 @@ struct ViewFoundItems: View {
         NavigationStack {
             ScrollView {
                 VStack {
-                    headerView
-                    
                     Text("Report a Finding")
                         .font(.title)
                         .foregroundColor(.gray)
@@ -42,7 +40,7 @@ struct ViewFoundItems: View {
                     pickerField(title: "What is that?", selection: $selectedItemType, options: itemTypes)
                     descriptionField(title: "More details", text: $description)
                     
-                    Spacer()
+                    //Spacer()
                     
                     HStack {
                         if let selectedImage = selectedImage {
@@ -99,36 +97,46 @@ struct ViewFoundItems: View {
                         .resizable()
                         .scaledToFill()
                         .clipped()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 )
             }
             .navigationTitle("Report Found Item")
             .navigationBarTitleDisplayMode(.inline)
+            Spacer()
+            bottomToolbar
+
         }
     }
     
-    private var headerView: some View {
-        HStack {
-            Button(action: { /* Dashboard action */ }) {
-                HStack {
-                    Image(systemName: "person.crop.circle")
-                    Text("My dashboard")
+    // Bottom toolbar
+    private var bottomToolbar: some View {
+            HStack {
+                // Chat button
+                Button(action: { print("Chat Action") }) {
+                    Label("Chat", systemImage: "message.fill")
                 }
-            }
-            .foregroundColor(.white)
-            
-            Spacer()
-            
-            Button(action: { print("Setting button works") }) {
-                HStack {
-                    Image(systemName: "gearshape.fill")
-                    Text("Setting")
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding()
+
+                Button(action: { print("Homepage Action") }) {
+                    Label("", systemImage: "house.fill")
                 }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding()
+
+                // Profile button
+                Button(action: { print("Profile Action") }) {
+                    Label("Profile", systemImage: "person.crop.circle")
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+                .padding()
             }
-            .foregroundColor(.white)
-        }
-        .padding()
-        .cornerRadius(10)
-        .shadow(radius: 5)
+            .frame(height: 60)
+            .background(Color.white)
+            .shadow(radius: 5)
     }
     
     private func inputField(title: String, text: Binding<String>) -> some View {

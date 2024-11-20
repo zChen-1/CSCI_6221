@@ -54,13 +54,6 @@
 			);
 			target = 740025D22CC0C5560045829D /* Swift_ASP */;
 		};
-		7424B0B42CEC21D30028BE59 /* Exceptions for "Lost_items_find" folder in "Lost_items_find" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 7424B08B2CEC21D20028BE59 /* Lost_items_find */;
-		};
 		74346CA42CDFF5FB0045FB33 /* Exceptions for "Swift_ASP" folder in "Swift_ASPTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -112,24 +105,6 @@
 		740025F72CC0C5570045829D /* Swift_ASPUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Swift_ASPUITests;
-			sourceTree = "<group>";
-		};
-		7424B08D2CEC21D20028BE59 /* Lost_items_find */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				7424B0B42CEC21D30028BE59 /* Exceptions for "Lost_items_find" folder in "Lost_items_find" target */,
-			);
-			path = Lost_items_find;
-			sourceTree = "<group>";
-		};
-		7424B0A52CEC21D30028BE59 /* Lost_items_findTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Lost_items_findTests;
-			sourceTree = "<group>";
-		};
-		7424B0AF2CEC21D30028BE59 /* Lost_items_findUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Lost_items_findUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -186,9 +161,6 @@
 				740025D52CC0C5560045829D /* Swift_ASP */,
 				740025ED2CC0C5570045829D /* Swift_ASPTests */,
 				740025F72CC0C5570045829D /* Swift_ASPUITests */,
-				7424B08D2CEC21D20028BE59 /* Lost_items_find */,
-				7424B0A52CEC21D30028BE59 /* Lost_items_findTests */,
-				7424B0AF2CEC21D30028BE59 /* Lost_items_findUITests */,
 				740025D42CC0C5560045829D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -289,9 +261,6 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				7424B08D2CEC21D20028BE59 /* Lost_items_find */,
-			);
 			name = Lost_items_find;
 			packageProductDependencies = (
 			);
@@ -312,9 +281,6 @@
 			dependencies = (
 				7424B0A42CEC21D30028BE59 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				7424B0A52CEC21D30028BE59 /* Lost_items_findTests */,
-			);
 			name = Lost_items_findTests;
 			packageProductDependencies = (
 			);
@@ -334,9 +300,6 @@
 			);
 			dependencies = (
 				7424B0AE2CEC21D30028BE59 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				7424B0AF2CEC21D30028BE59 /* Lost_items_findUITests */,
 			);
 			name = Lost_items_findUITests;
 			packageProductDependencies = (
