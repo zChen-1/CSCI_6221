@@ -11,11 +11,11 @@ import WebKit
 
 struct ContentView: View {
     @State private var isLoggedIn: Bool = false // Manage login state
-
+    @State private var navigateToChatView: Bool = false // Track navigation to chat view
     var body: some View {
         NavigationStack {
             if isLoggedIn {
-                UserUIView(isLoggedIn: $isLoggedIn)
+                UserUIView(navigateToChatView: $navigateToChatView, isLoggedIn: $isLoggedIn)
             } else {
                 LoginView(isLoggedIn: $isLoggedIn)
             }

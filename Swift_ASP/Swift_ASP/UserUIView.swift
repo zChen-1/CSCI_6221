@@ -31,7 +31,7 @@ struct UserUIView: View {
     @State private var navigateToDashboardView = false
     @State private var navigateToFoundView = false
     @State private var navigateToUserView: Bool = false
-    @State private var navigateToChatView = false
+    @Binding var navigateToChatView: Bool
     @Binding var isLoggedIn: Bool
     
     @State private var region = MKCoordinateRegion(
@@ -168,6 +168,7 @@ struct UserUIView: View {
             NavigationLink(destination: ViewFoundItems(navigateToUserView: $navigateToUserView), isActive: $navigateToFoundView) { EmptyView() }
             NavigationLink(destination: ViewLostItems(), isActive: $navigateToLostView) { EmptyView() }
             NavigationLink(destination: SettingView(), isActive: $navigateToSettingView) { EmptyView() }
+            NavigationLink(destination: ChatListView(), isActive: $navigateToChatView) { EmptyView() }
             Spacer()
             bottomToolbar
         }
@@ -241,12 +242,14 @@ struct UserUIView: View {
     private var bottomToolbar: some View {
             HStack {
                 // Chat button
-                Button(action: { print("Chat Action") }) {
-                    Label("Chat", systemImage: "message.fill")
-                }
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
-                .padding()
+                Button(action: {
+                           navigateToChatView = true  // This triggers the navigation
+                       }) {
+                           Label("Chat", systemImage: "message.fill")
+                       }
+                       .foregroundColor(.black)
+                       .frame(maxWidth: .infinity)
+                       .padding()
 
                 Button(action: { print("Homepage Action") }) {
                     Label("", systemImage: "house.fill")
@@ -299,6 +302,7 @@ struct ActionButtonStyle: ButtonStyle {
 
 struct UserUIView_Previews: PreviewProvider {
     static var previews: some View {
-        UserUIView(isLoggedIn: .constant(true))
+        UserUIView( navigateToChatView: .constant(false),isLoggedIn: .constant(true))
+            
     }
 }
