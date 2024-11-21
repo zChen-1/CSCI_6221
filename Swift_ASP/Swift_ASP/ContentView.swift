@@ -88,24 +88,7 @@ struct LoginView: View {
                     }
             
             VStack {
-                // Register Button
-                Button("Register") {
-                    message = "You must have your GWID to Login. Do you want to find your GWID?"
-                    showRegisterAlert = true
-                }
-                .alert(isPresented: $showRegisterAlert) {
-                    Alert(
-                        title: Text("Oops"),
-                        message: Text(message),
-                        primaryButton: .destructive(Text("Yes")) {
-                            // Open the browser with the GWU website
-                            if let url = URL(string: "https://it.gwu.edu/gweb") {
-                                UIApplication.shared.open(url)
-                            }
-                        },
-                        secondaryButton: .cancel(Text("No"))
-                    )
-                }
+                
                 
                 // Login Button
                 Button("Login") {
@@ -134,6 +117,25 @@ struct LoginView: View {
                     )
                 }
                 .padding()
+                
+                // Register Button
+                Button("Register") {
+                    message = "You must have your GWID to Login. Do you want to find your GWID?"
+                    showRegisterAlert = true
+                }
+                .alert(isPresented: $showRegisterAlert) {
+                    Alert(
+                        title: Text("Oops"),
+                        message: Text(message),
+                        primaryButton: .destructive(Text("Yes")) {
+                            // Open the browser with the GWU website
+                            if let url = URL(string: "https://it.gwu.edu/gweb") {
+                                UIApplication.shared.open(url)
+                            }
+                        },
+                        secondaryButton: .cancel(Text("No"))
+                    )
+                }
             }
             .padding()
             .navigationTitle("Login")

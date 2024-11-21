@@ -1,13 +1,6 @@
-//
-//  UserUIView.swift
-//  Swift_ASP
-//
-//  Created by ZH Chen on 2024/11/9.
-//
-
 import SwiftUI
 import MapKit
-import CloudKit
+import Supabase
 
 struct Location: Identifiable {
     var id = UUID()
@@ -16,18 +9,100 @@ struct Location: Identifiable {
     var locationID: Int
 }
 
-struct LostItems: Identifiable {
-    var id = UUID()
-    var name: String
-    var itemType: String
-    var itemDescription: String
-    var locationID: Int
-    var imageName: String
+struct ItemSupaHome: Codable, Identifiable {
+    let id : Int
+    let item_name: String
+    let category: String
+    let reported_by: UUID?
+    let is_active: Bool
+    let item_description: String
+    let location: String
+    let item_image: String?
+}
+
+struct ItemDetailModal: View {
+    let item: ItemSupaHome
+    @Binding var isPresented: Bool
+    
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .edgesIgnoringSafeArea(.all)
+                .onTapGesture {
+                    isPresented = false
+                }
+            
+            VStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 15) {
+                        if let imageUrl = item.item_image {
+                            AsyncImage(url: URL(string: imageUrl)) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .scaledToFit()
+                                case .failure(_):
+                                    Image(systemName: "photo")
+                                        .resizable()
+                                        .scaledToFit()
+                                @unknown default:
+                                    EmptyView()
+                                }
+                            }
+                            .frame(maxHeight: 200)
+                            .cornerRadius(12)
+                        }
+                        
+                        Group {
+                            DetailRow(title: "Item Name", value: item.item_name)
+                            DetailRow(title: "Category", value: item.category)
+                            DetailRow(title: "Description", value: item.item_description)
+                            DetailRow(title: "Location", value: item.location)
+                            DetailRow(title: "Status", value: item.is_active ? "Active" : "Inactive")
+                        }
+                    }
+                    .padding()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.white)
+                .cornerRadius(20)
+                .padding()
+                
+                Button("Close") {
+                    isPresented = false
+                }
+                .padding()
+                .frame(width: 200)
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .padding(.bottom)
+            }
+            .frame(maxWidth: .infinity, maxHeight: 600)
+        }
+    }
+}
+
+struct DetailRow: View {
+    let title: String
+    let value: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            Text(value)
+                .font(.body)
+        }
+    }
 }
 
 struct UserUIView: View {
     @State private var navigateToLostView = false
-    @State private var navigateToDashboardView = false
     @State private var navigateToFoundView = false
     @State private var navigateToUserView: Bool = false
     @Binding var navigateToChatView: Bool
@@ -37,10 +112,16 @@ struct UserUIView: View {
         center: CLLocationCoordinate2D(latitude: 38.899902, longitude: -77.047201),
         span: MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.008)
     )
-    //let lostItemsDatabase = CKContainer.default().publicCloudDatabase // Using CloudKit to save data of lost items
-    @State private var selectedLocationID: Int? = nil
-    @State private var selectedItem: LostItems? = nil
-    @State private var showItemAlert = false
+    
+    @State private var selectedLocation: Location? = nil
+    @State private var selectedItem: ItemSupaHome? = nil
+    @State private var showDetailModal = false
+    @State private var items: [ItemSupaHome] = []
+    
+    let supabase = SupabaseClient(
+        supabaseURL: URL(string: "https://trzpyocnxmimgvauphjm.supabase.co")!,
+        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyenB5b2NueG1pbWd2YXVwaGptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE3ODgwNzcsImV4cCI6MjA0NzM2NDA3N30.LHu4FCxWJFgx-iDJXEjoGmtIi7PtfJcZA2GkJ1gy1JQ"
+    )
     
     let locations = [
         Location(name: "The George Washington University Hospital", coordinate: CLLocationCoordinate2D(latitude: 38.901253, longitude: -77.050670), locationID: 1),
@@ -48,63 +129,19 @@ struct UserUIView: View {
         Location(name: "The Columbian College of Arts and Sciences (CCAS)", coordinate: CLLocationCoordinate2D(latitude: 38.900169, longitude: -77.047080), locationID: 3)
     ]
     
-    // Example data for lost items
-    
-    let lostItemsData: [LostItems] = [
-        LostItems(name: "Laptop", itemType: "Electronics", itemDescription: "A silver laptop found near SEAS", locationID: 1, imageName: "No_Image_Available"),
-        LostItems(name: "Phone", itemType: "Electronics", itemDescription: "An iPhone found at CCAS", locationID: 2, imageName: "No_Image_Available"),
-        LostItems(name: "Book", itemType: "Literature", itemDescription: "A textbook found at GW Hospital", locationID: 3, imageName: "No_Image_Available"),
-        LostItems(name: "Pen", itemType: "Office Supplies", itemDescription: "A black pen found at GW Hospital", locationID: 2, imageName: "No_Image_Available"),
-        LostItems(name: "Pencil", itemType: "Office Supplies", itemDescription: "A black pencil found at SEAS", locationID: 3, imageName: "No_Image_Available"),
-        LostItems(name: "Notebook", itemType: "Office Supplies", itemDescription: "A black notebook found at SEAS", locationID: 3, imageName: "No_Image_Available")
-    ]
-    
-    
-    func saveLostItemsToCloudKit(LostItems: [LostItems]) {
-        let container = CKContainer.default()
-        let privateDatabase = container.privateCloudDatabase
-
-        for item in LostItems {
-            let record = CKRecord(recordType: "LostItem")
-            record["name"] = item.name as CKRecordValue
-            record["itemType"] = item.itemType as CKRecordValue
-            record["itemDescription"] = item.itemDescription as CKRecordValue
-            record["locationID"] = item.locationID as CKRecordValue
-            record["imageName"] = item.imageName as CKRecordValue
-
-            privateDatabase.save(record) { (record, error) in
-                if let error = error {
-                    print("Error saving record: \(error)")
-                } else {
-                    print("Lost Item saved successfully: \(String(describing: record))")
-                }
+    func fetchItems() async {
+        do {
+            let response: [ItemSupaHome] = try await supabase
+                .from("items")
+                .select()
+                .execute()
+                .value
+            
+            DispatchQueue.main.async {
+                self.items = response
             }
-        }
-    }
-
-    func fetchLostItemsFromCloudKit() {
-        let container = CKContainer.default()
-        let privateDatabase = container.privateCloudDatabase
-        let query = CKQuery(recordType: "LostItem", predicate: NSPredicate(value: true))
-
-        privateDatabase.perform(query, inZoneWith: nil) { (records, error) in
-            if let error = error {
-                print("Error fetching records: \(error)")
-                return
-            }
-
-            if let records = records {
-                for record in records {
-                    guard let name = record["name"] as? String,
-                          let itemType = record["itemType"] as? String,
-                          let itemDescription = record["itemDescription"] as? String,
-                          let locationID = record["locationID"] as? Int,
-                          let imageName = record["imageName"] as? String else { continue }
-
-                    let lostItem = LostItems(name: name, itemType: itemType, itemDescription: itemDescription, locationID: locationID, imageName: imageName)
-                    print("Fetched Lost Item: \(lostItem)")
-                }
-            }
+        } catch {
+            print("Error fetching items: \(error)")
         }
     }
     
@@ -132,13 +169,20 @@ struct UserUIView: View {
                 .edgesIgnoringSafeArea(.all)
                 .frame(height: 400)
                 
-                if let id = selectedLocationID {
-                    createListOverlay(locationID: id)
+                if let location = selectedLocation {
+                    createListOverlay(location: location)
+                }
+                
+                if showDetailModal, let item = selectedItem {
+                    ItemDetailModal(item: item, isPresented: $showDetailModal)
                 }
                 
                 actionButtons
                 
                 Spacer()
+            }
+            .task {
+                await fetchItems()
             }
             .background(
                 Image("GW color")
@@ -163,10 +207,10 @@ struct UserUIView: View {
                 }
             }
             
-            // Navigation links
             NavigationLink(destination: ViewFoundItems(navigateToUserView: $navigateToUserView), isActive: $navigateToFoundView) { EmptyView() }
             NavigationLink(destination: ViewLostItems(navigateToUserView: $navigateToUserView), isActive: $navigateToLostView) { EmptyView() }
             NavigationLink(destination: ChatListView(), isActive: $navigateToChatView) { EmptyView() }
+            
             Spacer()
             bottomToolbar
         }
@@ -177,60 +221,79 @@ struct UserUIView: View {
             center: location.coordinate,
             span: MKCoordinateSpan(latitudeDelta: 0.008, longitudeDelta: 0.008)
         )
-        selectedLocationID = location.locationID // Set selected location ID
+        selectedLocation = location
     }
     
-    // Overlay to show a list of items found at the selected location
-    private func createListOverlay(locationID: Int) -> some View {
-        let itemsAtLocation = lostItemsData.filter { $0.locationID == locationID }
+    private func createListOverlay(location: Location) -> some View {
+        // Filter items by matching location name
+        let itemsAtLocation = items.filter { $0.location == location.name }
         
         return AnyView(
             ZStack {
                 Color.black.opacity(0.5)
                     .ignoresSafeArea()
-                    .onTapGesture { selectedLocationID = nil }
+                    .onTapGesture { selectedLocation = nil }
                 
                 VStack {
-                    Text("\(locations.first { $0.locationID == locationID }?.name ?? "")")
+                    Text(location.name)
                         .font(.headline)
                         .padding()
                         .foregroundColor(.white)
                     
-                    List(itemsAtLocation) { item in
-                        Button(action: {
-                            selectedItem = item
-                            showItemAlert = true
-                        }) {
-                            VStack(alignment: .leading) {
-                                Text(item.name)
-                                    .font(.headline)
-                                Text(item.itemDescription)
-                                    .font(.subheadline)
-                                Image(item.imageName)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 100, height: 100)
-                                    .cornerRadius(8)
+                    if itemsAtLocation.isEmpty {
+                        Text("No items reported at this location")
+                            .foregroundColor(.white)
+                            .padding()
+                    } else {
+                        List(itemsAtLocation) { item in
+                            Button(action: {
+                                selectedItem = item
+                                showDetailModal = true
+                            }) {
+                                VStack(alignment: .leading) {
+                                    Text(item.item_name)
+                                        .font(.headline)
+                                    Text(item.category)
+                                        .font(.subheadline)
+                                    Text(item.location)
+                                        .font(.subheadline)
+                                    Text(item.item_description)
+                                        .font(.subheadline)
+                                    if let imageUrl = item.item_image {
+                                        AsyncImage(url: URL(string: imageUrl)) { phase in
+                                            switch phase {
+                                            case .empty:
+                                                ProgressView()
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(height: 100)
+                                            case .failure(_):
+                                                Image(systemName: "photo")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(height: 100)
+                                            @unknown default:
+                                                EmptyView()
+                                            }
+                                        }
+                                        .cornerRadius(8)
+                                    }
+                                }
                             }
                         }
+                        .frame(width: 350, height: 300)
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .shadow(radius: 10)
+                        .foregroundColor(.black)
                     }
-                    .frame(width: 350, height: 300)
-                    .background(Color.white)
-                    .cornerRadius(10)
-                    .shadow(radius: 10)
-                    .foregroundColor(.black)
                     
-                    Button(action: { selectedLocationID = nil }) {
+                    Button(action: { selectedLocation = nil }) {
                         Text("Close")
                     }
                     .padding()
-                }
-                .alert(item: $selectedItem) { item in
-                    Alert(
-                        title: Text("Item Details"),
-                        message: Text(item.itemDescription),
-                        dismissButton: .default(Text("OK"))
-                    )
                 }
             }
         )

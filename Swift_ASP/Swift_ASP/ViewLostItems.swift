@@ -220,27 +220,27 @@ struct ViewLostItems: View {
         .padding(.horizontal)
     }
 
-    func saveLostItemsToCloudKit(lostItems: [LostItems]) {
-        let container = CKContainer.default()
-        let privateDatabase = container.privateCloudDatabase
-
-        for item in lostItems {
-            let record = CKRecord(recordType: "LostItem")
-            record["name"] = item.name as CKRecordValue
-            record["itemType"] = item.itemType as CKRecordValue
-            record["itemDescription"] = item.itemDescription as CKRecordValue
-            record["locationID"] = item.locationID as CKRecordValue
-            record["imageName"] = item.imageName as CKRecordValue
-
-            privateDatabase.save(record) { (record, error) in
-                if let error = error {
-                    print("Error saving record: \(error)")
-                } else {
-                    print("Lost Item saved successfully: \(String(describing: record))")
-                }
-            }
-        }
-    }
+//    func saveLostItemsToCloudKit(lostItems: [LostItems]) {
+//        let container = CKContainer.default()
+//        let privateDatabase = container.privateCloudDatabase
+//
+//        for item in lostItems {
+//            let record = CKRecord(recordType: "LostItem")
+//            record["name"] = item.name as CKRecordValue
+//            record["itemType"] = item.itemType as CKRecordValue
+//            record["itemDescription"] = item.itemDescription as CKRecordValue
+//            record["locationID"] = item.locationID as CKRecordValue
+//            record["imageName"] = item.imageName as CKRecordValue
+//
+//            privateDatabase.save(record) { (record, error) in
+//                if let error = error {
+//                    print("Error saving record: \(error)")
+//                } else {
+//                    print("Lost Item saved successfully: \(String(describing: record))")
+//                }
+//            }
+//        }
+//    }
     
     private func isValidInputs() -> Bool {
         
