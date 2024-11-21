@@ -12,7 +12,16 @@ The *Lost and Found Map* app is exclusively for students and restricted to campu
 * Samank Gupta
 * Vaishnavi Kamdi
 * Zhihuang Chen
- 
+
+## How to use:
+Install the Chat SDK:
+1. Select "Add Packages…" in File menu
+2. Paste the URL https://github.com/getstream/stream-chat-swiftui
+3. In the option "Dependency Rule" choose "Up to next major version", and in the text input next to it, enter "4.44.0".
+4. Choose "Add Package" and wait for the dialog to complete
+5. Only select "StreamChatSwiftUI" and select "Add Package" again
+
+More info: https://getstream.io/tutorials/ios-chat/
  
  
  
