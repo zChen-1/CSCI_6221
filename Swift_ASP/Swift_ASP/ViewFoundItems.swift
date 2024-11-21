@@ -10,7 +10,8 @@ import UIKit
 import CloudKit
 
 struct ViewFoundItems: View {
-    @Binding var navigateToUserView: Bool  // Binding for navigation back
+    @Environment(\.presentationMode) var presentationMode
+    @Binding var navigateToUserView: Bool
     @State private var email: String = ""
     @State private var confirmEmail: String = ""
     @State private var selectedLocation: String = "Select a location"
@@ -40,7 +41,7 @@ struct ViewFoundItems: View {
                     pickerField(title: "What is that?", selection: $selectedItemType, options: itemTypes)
                     descriptionField(title: "More details", text: $description)
                     
-                    //Spacer()
+                    Spacer()
                     
                     HStack {
                         if let selectedImage = selectedImage {
@@ -69,8 +70,8 @@ struct ViewFoundItems: View {
                         Button("Submit") {
                             if isValidInputs() {
                                 handleSubmit()
-                                message = "Item reported successfully!"
-                                navigateToUserView = true // Navigate back after submission
+                                //message = "Item reported successfully!"
+                                //navigateToUserView = true // Navigate back after submission
                             } else {
                                 showAlert = true
                             }
@@ -87,22 +88,22 @@ struct ViewFoundItems: View {
                         .cornerRadius(10)
                         .shadow(radius: 10)
                     }
+                    .padding(.top, 20)
                 }
                 .padding()
                 .sheet(isPresented: $showingImagePicker) {
                     ImagePicker(image: $selectedImage, isCamera: $isCamera) // Use ImagePicker when adding images
                 }
-                .background(
-                    Image("GW color")
-                        .resizable()
-                        .scaledToFill()
-                        .clipped()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                )
             }
             .navigationTitle("Report Found Item")
             .navigationBarTitleDisplayMode(.inline)
-            Spacer()
+            .background(
+                Image("GW color")
+                    .resizable()
+                    .scaledToFill()
+                    .clipped()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity))
+            
             bottomToolbar
 
         }
@@ -119,7 +120,7 @@ struct ViewFoundItems: View {
                 .frame(maxWidth: .infinity)
                 .padding()
 
-                Button(action: { print("Homepage Action") }) {
+                Button(action: { presentationMode.wrappedValue.dismiss() }) {
                     Label("", systemImage: "house.fill")
                 }
                 .foregroundColor(.black)
@@ -242,9 +243,10 @@ struct ViewFoundItems: View {
     
     // Handle Submit to save, connect to a DB later!!!
     private func handleSubmit() {
-        // Implement your submission logic here, e.g., send data to a server or save it
+        // send data to a server and save it
         //saveLostItemsToCloudKit(lostItems)
         print("Email: \(email), Location: \(selectedLocation), Item Type: \(selectedItemType), Description: \(description)")
+        presentationMode.wrappedValue.dismiss()
     }
 }
 

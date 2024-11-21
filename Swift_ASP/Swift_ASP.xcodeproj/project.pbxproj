@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		747A25A72CEEF72A001828F4 /* StreamChatSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 747A25A62CEEF72A001828F4 /* StreamChatSwiftUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		740025EB2CC0C5570045829D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -114,6 +118,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				747A25A72CEEF72A001828F4 /* StreamChatSwiftUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -198,6 +203,7 @@
 			);
 			name = Swift_ASP;
 			packageProductDependencies = (
+				747A25A62CEEF72A001828F4 /* StreamChatSwiftUI */,
 			);
 			productName = Swift_ASP;
 			productReference = 740025D32CC0C5560045829D /* Swift_ASP.app */;
@@ -351,6 +357,9 @@
 			);
 			mainGroup = 740025CA2CC0C5560045829D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				747A25632CEEF506001828F4 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 740025D42CC0C5560045829D /* Products */;
 			projectDirPath = "";
@@ -930,6 +939,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		747A25632CEEF506001828F4 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getstream/stream-chat-swiftui";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.66.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		747A25A62CEEF72A001828F4 /* StreamChatSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 747A25632CEEF506001828F4 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */;
+			productName = StreamChatSwiftUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 740025CB2CC0C5560045829D /* Project object */;
 }

@@ -14,12 +14,14 @@ struct LostItem: Identifiable {
 }
 
 struct ViewLostItems: View {
+    @Environment(\.presentationMode) var presentationMode
     @State private var navigateToLostView: Bool = false
     @State private var email: String = ""
     @State private var confirmEmail: String = ""
     @State private var selectedLocation: String = "Select a location"
     @State private var selectedItemType: String = "Select an item type"
     @State private var description: String = ""
+    @State private var navigateToUserView = false
     
     let itemTypes: [String] = ["Select an item type", "Book", "Journal", "Magazine", "Article", "ID", "Key", "Other"]
     let locations: [String] = ["Select a location", "The George Washington University Hospital", "The School of Engineering and Applied Science (SEAS)", "The Columbian College of Arts and Sciences (CCAS)"]
@@ -39,7 +41,7 @@ struct ViewLostItems: View {
                 descriptionField(title: "More details", text: $description)
                 
                 Spacer()
-                Button(action: { navigateToLostView.toggle() }) {
+                Button(action: { handleSubmit() }) {
                     Text("Submit")
                         .font(.headline)
                         .foregroundColor(.black)
@@ -72,7 +74,7 @@ struct ViewLostItems: View {
                 .frame(maxWidth: .infinity)
                 .padding()
 
-                Button(action: { print("Homepage Action") }) {
+                Button(action: { navigateToUserView = true }) {
                     Label("", systemImage: "house.fill")
                 }
                 .foregroundColor(.black)
@@ -143,29 +145,16 @@ struct ViewLostItems: View {
         }
         .padding(.horizontal)
     }
-
-}
-
-// Detail view for each lost item
-struct LostItemDetailView: View {
-    var item: LostItem
     
-    var body: some View {
-        VStack {
-            Text(item.name)
-                .font(.largeTitle)
-                .padding()
-            // Further details about the item can go here
-            Text("Details about \(item.name) go here.")
-                .padding()
-            Spacer()
-        }
-        .navigationTitle(item.name)
-        .navigationBarTitleDisplayMode(.inline)
+    private func handleSubmit() {
+        // send data to a server and save it
+        //saveLostItemsToCloudKit(lostItems)
+        print("Email: \(email), Location: \(selectedLocation), Item Type: \(selectedItemType), Description: \(description)")
+        presentationMode.wrappedValue.dismiss()
     }
+
 }
 
-// Preview Provider
 #Preview {
     ViewLostItems()
 }

@@ -27,7 +27,6 @@ struct LostItems: Identifiable {
 
 struct UserUIView: View {
     @State private var navigateToLostView = false
-    @State private var navigateToSettingView = false
     @State private var navigateToDashboardView = false
     @State private var navigateToFoundView = false
     @State private var navigateToUserView: Bool = false
@@ -167,7 +166,6 @@ struct UserUIView: View {
             // Navigation links
             NavigationLink(destination: ViewFoundItems(navigateToUserView: $navigateToUserView), isActive: $navigateToFoundView) { EmptyView() }
             NavigationLink(destination: ViewLostItems(), isActive: $navigateToLostView) { EmptyView() }
-            NavigationLink(destination: SettingView(), isActive: $navigateToSettingView) { EmptyView() }
             NavigationLink(destination: ChatListView(), isActive: $navigateToChatView) { EmptyView() }
             Spacer()
             bottomToolbar
