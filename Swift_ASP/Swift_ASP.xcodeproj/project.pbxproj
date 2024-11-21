@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		747A25A72CEEF72A001828F4 /* StreamChatSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 747A25A62CEEF72A001828F4 /* StreamChatSwiftUI */; };
+		AA0378EB2CEFC7640077E519 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = AA0378EA2CEFC7640077E519 /* Auth */; };
+		AA0378ED2CEFC7640077E519 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = AA0378EC2CEFC7640077E519 /* Functions */; };
+		AA0378EF2CEFC7640077E519 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = AA0378EE2CEFC7640077E519 /* PostgREST */; };
+		AA0378F12CEFC7640077E519 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = AA0378F02CEFC7640077E519 /* Realtime */; };
+		AA0378F32CEFC7640077E519 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = AA0378F22CEFC7640077E519 /* Storage */; };
+		AA0378F52CEFC7640077E519 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = AA0378F42CEFC7640077E519 /* Supabase */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +67,7 @@
 		74346CA42CDFF5FB0045FB33 /* Exceptions for "Swift_ASP" folder in "Swift_ASPTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				AuthService.swift,
 				ChatView.swift,
 				DashboardView.swift,
 				DB.swift,
@@ -76,6 +83,7 @@
 		74346CA52CDFF5FB0045FB33 /* Exceptions for "Swift_ASP" folder in "Swift_ASPUITests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				AuthService.swift,
 				ChatView.swift,
 				DashboardView.swift,
 				DB.swift,
@@ -118,6 +126,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA0378F52CEFC7640077E519 /* Supabase in Frameworks */,
+				AA0378F32CEFC7640077E519 /* Storage in Frameworks */,
+				AA0378EF2CEFC7640077E519 /* PostgREST in Frameworks */,
+				AA0378ED2CEFC7640077E519 /* Functions in Frameworks */,
+				AA0378EB2CEFC7640077E519 /* Auth in Frameworks */,
+				AA0378F12CEFC7640077E519 /* Realtime in Frameworks */,
 				747A25A72CEEF72A001828F4 /* StreamChatSwiftUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -204,6 +218,12 @@
 			name = Swift_ASP;
 			packageProductDependencies = (
 				747A25A62CEEF72A001828F4 /* StreamChatSwiftUI */,
+				AA0378EA2CEFC7640077E519 /* Auth */,
+				AA0378EC2CEFC7640077E519 /* Functions */,
+				AA0378EE2CEFC7640077E519 /* PostgREST */,
+				AA0378F02CEFC7640077E519 /* Realtime */,
+				AA0378F22CEFC7640077E519 /* Storage */,
+				AA0378F42CEFC7640077E519 /* Supabase */,
 			);
 			productName = Swift_ASP;
 			productReference = 740025D32CC0C5560045829D /* Swift_ASP.app */;
@@ -359,6 +379,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				747A25632CEEF506001828F4 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */,
+				AA0378E92CEFC7640077E519 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 740025D42CC0C5560045829D /* Products */;
@@ -949,6 +970,14 @@
 				minimumVersion = 4.66.0;
 			};
 		};
+		AA0378E92CEFC7640077E519 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -956,6 +985,36 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 747A25632CEEF506001828F4 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */;
 			productName = StreamChatSwiftUI;
+		};
+		AA0378EA2CEFC7640077E519 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0378E92CEFC7640077E519 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		AA0378EC2CEFC7640077E519 /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0378E92CEFC7640077E519 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		AA0378EE2CEFC7640077E519 /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0378E92CEFC7640077E519 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		AA0378F02CEFC7640077E519 /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0378E92CEFC7640077E519 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		AA0378F22CEFC7640077E519 /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0378E92CEFC7640077E519 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		AA0378F42CEFC7640077E519 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0378E92CEFC7640077E519 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -8,6 +8,7 @@
 import SwiftUI
 import CoreData
 import WebKit
+import Supabase
 
 struct ContentView: View {
     @State private var isLoggedIn: Bool = false // Manage login state
@@ -57,7 +58,7 @@ struct LoginView: View {
                 .resizable()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .aspectRatio(contentMode: .fit)
-            
+                
             // Login box (Username)
             HStack {
                 TextField("GWID", text: $username)

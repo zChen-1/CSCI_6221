@@ -165,7 +165,7 @@ struct UserUIView: View {
             
             // Navigation links
             NavigationLink(destination: ViewFoundItems(navigateToUserView: $navigateToUserView), isActive: $navigateToFoundView) { EmptyView() }
-            NavigationLink(destination: ViewLostItems(), isActive: $navigateToLostView) { EmptyView() }
+            NavigationLink(destination: ViewLostItems(navigateToUserView: $navigateToUserView), isActive: $navigateToLostView) { EmptyView() }
             NavigationLink(destination: ChatListView(), isActive: $navigateToChatView) { EmptyView() }
             Spacer()
             bottomToolbar

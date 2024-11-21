@@ -8,12 +8,31 @@
 import SwiftUI
 import UIKit
 import CloudKit
+import Supabase
+
+struct ItemSupa: Codable {
+//    let item_id: Int
+    let item_name: String
+    let category: String
+    let reported_by: UUID?
+    let is_active: Bool
+    let item_description: String
+    let location: String
+    let item_image: String?
+}
 
 struct ViewFoundItems: View {
+
+    
+    let supabase = SupabaseClient(
+        supabaseURL: URL(string: "https://trzpyocnxmimgvauphjm.supabase.co")!,
+        supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyenB5b2NueG1pbWd2YXVwaGptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE3ODgwNzcsImV4cCI6MjA0NzM2NDA3N30.LHu4FCxWJFgx-iDJXEjoGmtIi7PtfJcZA2GkJ1gy1JQ"
+    )
+    
     @Environment(\.presentationMode) var presentationMode
     @Binding var navigateToUserView: Bool
-    @State private var email: String = ""
-    @State private var confirmEmail: String = ""
+    @StateObject private var authService = AuthService.shared
+    
     @State private var selectedLocation: String = "Select a location"
     @State private var selectedItemType: String = "Select an item type"
     @State private var description: String = ""
@@ -22,8 +41,9 @@ struct ViewFoundItems: View {
     @State private var selectedImage: UIImage?
     @State private var showingImagePicker = false
     @State private var isCamera = false
-    
-    let itemTypes: [String] = ["Select an item type", "Book", "Journal", "Magazine", "Article", "ID", "Key", "Other"]
+    @State private var navigateToHome = false
+
+    let itemTypes: [String] = ["Select an item type", "Book", "Laptop", "Bag", "Phone", "ID", "Key", "Wallet", "Earphones", "Other"]
     let locations: [String] = ["Select a location", "The George Washington University Hospital", "The School of Engineering and Applied Science (SEAS)", "The Columbian College of Arts and Sciences (CCAS)"]
     
     var body: some View {
@@ -32,18 +52,17 @@ struct ViewFoundItems: View {
                 VStack {
                     Text("Report a Finding")
                         .font(.title)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.white)
                         .padding()
                     
-                    inputField(title: "Enter your Email Address", text: $email)
-                    inputField(title: "Confirm your Email Address", text: $confirmEmail)
+                    
+                    pickerField(title: "What did you find?", selection: $selectedItemType, options: itemTypes)
                     pickerField(title: "Where did you find it?", selection: $selectedLocation, options: locations)
-                    pickerField(title: "What is that?", selection: $selectedItemType, options: itemTypes)
-                    descriptionField(title: "More details", text: $description)
+                    descriptionField(title: "More details about the item", text: $description)
                     
                     Spacer()
                     
-                    HStack {
+                    VStack {
                         if let selectedImage = selectedImage {
                             Button(action: {
                                 showingImagePicker.toggle() // Show image picker again
@@ -90,9 +109,18 @@ struct ViewFoundItems: View {
                     }
                     .padding(.top, 20)
                 }
+                .navigationDestination(isPresented: $navigateToHome) {
+                    UserUIView(navigateToChatView: $navigateToHome, isLoggedIn: $navigateToHome) // Replace with your home page view
+                            }
                 .padding()
                 .sheet(isPresented: $showingImagePicker) {
                     ImagePicker(image: $selectedImage, isCamera: $isCamera) // Use ImagePicker when adding images
+                }.alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Success"),
+                        message: Text(message),
+                        dismissButton: .default(Text("OK"))
+                    )
                 }
             }
             .navigationTitle("Report Found Item")
@@ -215,14 +243,7 @@ struct ViewFoundItems: View {
     }
     
     private func isValidInputs() -> Bool {
-        if email.isEmpty || !isValidEmail(email) {
-            message = "Please enter a valid email address."
-            return false
-        }
-        if email != confirmEmail {
-            message = "Email and confirmation must match."
-            return false
-        }
+        
         if selectedLocation == "Select a location" {
             message = "Please select a location."
             return false
@@ -234,20 +255,84 @@ struct ViewFoundItems: View {
         return true
     }
     
-    // Email format validation,
-    func isValidEmail(_ email: String) -> Bool {
-        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Z0-9a-z.-]+\\.[A-Za-z]{2,}"
-        let emailTest = NSPredicate(format: "SELF MATCHES %@", emailRegEx)
-        return emailTest.evaluate(with: email)
-    }
+//    // Email format validation,
+//    func isValidEmail(_ email: String) -> Bool {
+//        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Z0-9a-z.-]+\\.[A-Za-z]{2,}"
+//        let emailTest = NSPredicate(format: "SELF MATCHES %@", emailRegEx)
+//        return emailTest.evaluate(with: email)
+//    }
     
     // Handle Submit to save, connect to a DB later!!!
     private func handleSubmit() {
         // send data to a server and save it
         //saveLostItemsToCloudKit(lostItems)
-        print("Email: \(email), Location: \(selectedLocation), Item Type: \(selectedItemType), Description: \(description)")
+        print("Location: \(selectedLocation), Item Type: \(selectedItemType), Description: \(description)")
+        Task {
+                    do {
+                        let savedItem = try await saveItem()
+                        print("Item saved successfully: \(savedItem)")
+                        message = "Item added successfully!"
+                        showAlert = true
+                        navigateToHome = true
+                    } catch {
+                        print("Error saving item: \(error)")
+                    }
+                }
         presentationMode.wrappedValue.dismiss()
     }
+    
+    func saveItem() async throws -> ItemSupa {
+        // 1. Upload image if exists
+        var imageUrl: String? = nil
+        if let image = selectedImage,
+                   let imageData = image.jpegData(compressionQuality: 0.7) {
+                    imageUrl = try await uploadImage(imageData: imageData)
+                }
+        
+            // 2. Create item record
+            let newItem = ItemSupa(
+//                id: UUID(),
+                item_name: selectedItemType,
+                category: "Found",
+                reported_by: authService.currentUser?.id,
+                is_active: true,
+                item_description: description,
+                location: selectedLocation,
+                item_image: imageUrl
+                
+            )
+            
+            // 3. Insert item into Supabase
+            return try await supabase
+                .from("items")
+                .insert(newItem)
+                .select()
+                .single().execute().value
+            
+        }
+    
+    private func uploadImage(imageData: Data) async throws -> String {
+            let fileName = "\(selectedItemType).jpg" // Use the ID as the file name
+            let filePath = "\(fileName)"
+        
+            // Upload image to Supabase storage
+            try await supabase
+                .storage
+                .from("images")
+                .upload(
+                    path: filePath,
+                    file: imageData,
+                    options: FileOptions(contentType: "image/jpeg")
+                )
+            
+            // Generate public URL
+            let publicUrl = try supabase
+                .storage
+                .from("images")
+                .getPublicURL(path: filePath)
+            
+            return publicUrl.absoluteString
+        }
 }
 
 struct ImagePicker: UIViewControllerRepresentable {
